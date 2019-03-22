@@ -1,0 +1,5 @@
+sqlalchemy
+pika
+pytrends
+pymysql
+psycopg2

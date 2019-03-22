@@ -1,0 +1,13 @@
+version: '3'
+services:
+  web:
+    command: python trends.py
+    environment:
+      - PYTHONUNBUFFERED=0
+    build:
+      context: .
+    ports:
+      - 81:5000
+    volumes:
+      - ./logs:/code/logs
+      - .:/code
