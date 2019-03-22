@@ -18,3 +18,9 @@ You should see "Hello World"
 ```
 docker-compose down
 ```# Trends
+
+##Первый запуск программы, сначала загружается Bitcoin
+first_run()
+Данные собраны с 2017-01-01 года
+Данные по криптовалютам забираются из базы MySQL
+Временные данные пишутся в таблицу google.trends prosphero
