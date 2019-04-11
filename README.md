@@ -1,3 +1,13 @@
+Два режима работы докера.
+1. Режим сбора истории по всем валютам
+Для этого в файле docker-compose.yml надо поставить строку 'command: python trends.py all'
+2. Режим сбора истории по закачанным валютам
+Для этого в файле docker-compose.yml надо поставить строку 'command: python trends.py update'
+
+Внимание!!!! Сначала, надо собрать историю, только после этого можно обновлять данные
+
+P.S. Если очень много качать, google trends блокирует запись на пару часов, потом можно снова начинать 
+
 # Docker template for python development
 
 Implemented to kick start new python projects quickly.
