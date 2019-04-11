@@ -173,6 +173,13 @@ def get_cites_from_dttm (name_currency, dttm_start, dttm_end, on_currency):
                     print(result_db[k])
                     mean_d = 0.01
                 DB_postgres.insert(mean_d, name_currency, d_currency[k], k, item_name)
+                result = dict(
+                    keyword=name_currency,
+                    dttm=str(k),
+                    value=mean_d
+                )
+                result = json.dumps(result)
+                insert_rabbit(result)
         return on_currency
 
 
