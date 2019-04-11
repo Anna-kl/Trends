@@ -2,14 +2,14 @@
 
 import datetime
 import function_trends
+import sys
 
 # load all currency
 def get_all_currency ():
     name_currency = function_trends.get_currency_name()
 
     for item in name_currency:
-        if item['inside_id'] > 100:
-            break
+
         if item['inside_id'] < 25:
             item_currency = 'bitcoin'
         else:
@@ -111,8 +111,15 @@ def dttm_history(name_currency):
     function_trends.get_cites_from_dttm(name_currency, dttm_start, date_end,item_currency)
 
 
-dttm=datetime.datetime.now().date()
-dttm=datetime.datetime.strptime(str(dttm.year)+'-'+str(dttm.month)+'-'+str(dttm.day)+' 00:00:00','%Y-%m-%d %H:%M:%S')
+if __name__ == "__main__":
+    if sys.argv[1]=='all':
+        get_all_currency()
+        print('all currency load')
+    elif sys.argv[2]=='update':
 
-function_trends.get_update_data('bitcoin',dttm)
-update()
+
+        dttm=datetime.datetime.now().date()
+        dttm=datetime.datetime.strptime(str(dttm.year)+'-'+str(dttm.month)+'-'+str(dttm.day)+' 00:00:00','%Y-%m-%d %H:%M:%S')
+
+        function_trends.get_update_data('bitcoin',dttm)
+        update()
