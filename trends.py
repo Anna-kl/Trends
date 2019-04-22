@@ -10,10 +10,7 @@ def get_all_currency ():
 
     for item in name_currency:
 
-        if item['inside_id'] < 25:
-            item_currency = 'bitcoin'
-        else:
-            item_currency = 'bch'
+      try:
         if item['source_id'].lower().replace('$', '').replace('#', '') == item['symbol'].lower().replace('$',
                                                                                                          '').replace(
                 '#', '') == False:
@@ -24,7 +21,8 @@ def get_all_currency ():
                 dttm_history(item['symbol'].lower().replace('$', '').replace('#', ''))
             if function_trends.check_currency(item['source_id'].lower().replace('$', '').replace('#', '')) == False:
                 dttm_history(item['source_id'].lower().replace('$', '').replace('#', ''))
-
+      except:
+          continue
 
 def get_currency(name_currency):
     dttm=function_trends.get_last_data(name_currency)
@@ -58,6 +56,7 @@ def update():
                 function_trends.get_update_data(item['source_id'].lower(),dttm)
        except:
            print('error')
+           continue
 
 
 #Первый запуск программы, сначала загружается Bitcoin
