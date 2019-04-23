@@ -114,11 +114,15 @@ if __name__ == "__main__":
     if sys.argv[1]=='all':
         get_all_currency()
         print('all currency load')
-    elif sys.argv[2]=='update':
+    elif sys.argv[1]=='update':
+        new_data = function_trends.last_date('bitcoin')
+        dttm_end = datetime.datetime.now() - datetime.timedelta(days=3)
 
+        if new_data < dttm_end:
+            function_trends.get_btc_coef('bitcoin', new_data, dttm_end)
+            function_trends.get_7_days_btc()
+        elif new_data.date() < (datetime.datetime.now() - datetime.timedelta(days=1)).date():
 
-        dttm=datetime.datetime.now().date()
-        dttm=datetime.datetime.strptime(str(dttm.year)+'-'+str(dttm.month)+'-'+str(dttm.day)+' 00:00:00','%Y-%m-%d %H:%M:%S')
+            function_trends.get_7_days_btc()
 
-        function_trends.get_update_data('bitcoin',dttm)
         update()
