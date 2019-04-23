@@ -269,7 +269,7 @@ def get_btc_coef (name_currency, dttm_start, dttm_end):
 
     d = get_d_btc.to_dict()
     result_db = get_last_data_db('bitcoin', dttm_start)
-    coef = result_db['cited'] / d_currency[dttm_end]
+    coef = result_db['cited'] / d_currency[dttm_start]
     dttm_start = dttm_start + datetime.timedelta(days=1)
     for k, n in d.items():
 
@@ -435,7 +435,8 @@ def get_interest (name_currency, param):
 def get_update_data (name_currency, dttm):
     on_currency = get_on_currency(name_currency)
     dttm = get_last_dttm(name_currency)
-    if dttm.date() == datetime.datetime.now().date():
+
+    if dttm.date() == (datetime.datetime.now() - datetime.timedelta(days=1)).date():
         return True
     if datetime.datetime.now() - datetime.timedelta(days=7) > dttm:
         dttm_end = datetime.datetime.now() - datetime.timedelta(days=3)
@@ -450,7 +451,7 @@ def get_update_data (name_currency, dttm):
     d = get_d_btc.to_dict()
     table_currency = currency.select().with_only_columns(
         [currency.c.dttm, currency.c.cited, currency.c.not_cited]).where((currency.c.currency == name_currency) & (
-            currency.c.dttm >= dttm))
+            currency.c.dttm >= dttm)).order_by(desc(currency.c.dttm))
     db = DB_postgres.con.execute(table_currency)
 
     for item in db:
@@ -473,6 +474,8 @@ def get_update_data (name_currency, dttm):
                 break
 
     for k, n in d.items():
+        if k.date() == (datetime.datetime.now() - datetime.timedelta(days=1)).date():
+            break
         if k >= dttm and k < dttm + datetime.timedelta(days=1) and dttm + datetime.timedelta(
                 days=1) < datetime.datetime.now():
             sum += d_currency[k]
@@ -536,6 +539,8 @@ def get_7_days (name_currency):
                 break
     old_data = old_data + datetime.timedelta(days=1)
     for k, n in d.items():
+        if k.date() == (datetime.datetime.now() - datetime.timedelta(days=1)).date():
+            break
         if k >= old_data and k < old_data + datetime.timedelta(days=1) and old_data + datetime.timedelta(
                 days=1) < datetime.datetime.now():
             sum += d_currency[k]
@@ -614,6 +619,8 @@ def get_7_days_btc ():
                 break
     old_data = old_data + datetime.timedelta(days=1)
     for k, n in d.items():
+        if k.date() == (datetime.datetime.now() - datetime.timedelta(days=1)).date():
+            break
         if k >= old_data and k < old_data + datetime.timedelta(days=1) and old_data + datetime.timedelta(
                 days=1) < datetime.datetime.now():
             sum += d[k]
