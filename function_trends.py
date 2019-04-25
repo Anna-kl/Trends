@@ -10,6 +10,19 @@ import json
 import pika
 
 e = os.environ
+# e['host']='185.230.142.61'
+# e['login']='externalanna'
+# e['password']='44iAipyAjHHxkwHgyAPrqPSR5'
+#
+# e['host_mysql']='clh.datalight.me'
+# e['user']='reader'
+# e['password_mysql']='nb7hd-1HG6f'
+# e['db_mysql']='coins_dict'
+#
+# e['login_MQ']='google_trends'
+# e['password_MQ']='X3g6unrboVScnyfe'
+# e['host_MQ']='parser.datalight.me'
+# e['queue']='google_trends'
 
 
 class DB:
@@ -23,6 +36,9 @@ class DB:
         setting['host'] = e.get('host')
         setting['login'] = e.get('login')
         setting['password'] = e.get('password')
+        # setting['host'] = e.get('host')
+        # setting['login'] = e.get('login')
+        # setting['password'] = e.get('password')
         url = url.format(setting['login'], setting['password'], setting['host'], 'prosphero')
         con = sqlalchemy.create_engine(url, echo=True)
         return con
@@ -30,16 +46,20 @@ class DB:
     def return_connection (self):
         return self.con
 
-    def insert (self, mean_d, name_currency, d_currency, temp_k, on_currency):
-        insert = dict(
-            currency=name_currency,
-            not_cited=d_currency,
-            cited=mean_d,
-            dttm=temp_k,
-            on_currency=on_currency
-        )
-        cur_insert = currency.insert(insert)
-        self.con.execute(cur_insert)
+    def insert (self, result):
+        if len(result)==0:
+            return 0
+        cur_insert=[]
+        for item in result:
+            insert = dict(
+                currency=item[1],
+                not_cited=item[0],
+                cited=item[2],
+                dttm=item[3],
+                on_currency=item[4]
+            )
+            cur_insert.append(insert)
+        self.con.execute(currency.insert(),cur_insert)
 
 
 DB_postgres = DB()
@@ -160,10 +180,10 @@ def get_cites_from_dttm (name_currency, dttm_start, dttm_end, on_currency):
             if count > 2 and item_name != 'miota':
                 continue
         d = get_d_btc.to_dict()
-
+        result=[]
         result_db = get_data_from_db(item_name)
         for k, n in d.items():
-
+            temp=[]
             if k >= dttm_start and k <= dttm_end:
                 try:
                     mean_d = (d_currency[k] * result_db[k]) / d[k]
@@ -172,14 +192,22 @@ def get_cites_from_dttm (name_currency, dttm_start, dttm_end, on_currency):
                 if mean_d == 0:
                     print(result_db[k])
                     mean_d = 0.01
-                DB_postgres.insert(mean_d, name_currency, d_currency[k], k, item_name)
-                result = dict(
+
+                result_rb = dict(
                     keyword=name_currency,
                     dttm=str(k),
                     value=mean_d
                 )
-                result = json.dumps(result)
-                insert_rabbit(result)
+                result_rb = json.dumps(result_rb)
+                insert_rabbit(result_rb)
+                temp.append(d_currency[k])
+
+                temp.append(name_currency)
+                temp.append(mean_d)
+                temp.append(k)
+                temp.append(on_currency)
+                result.append(temp)
+        DB_postgres.insert(result)
         return on_currency
 
 
@@ -271,14 +299,29 @@ def get_btc_coef (name_currency, dttm_start, dttm_end):
     result_db = get_last_data_db('bitcoin', dttm_start)
     coef = result_db['cited'] / d_currency[dttm_start]
     dttm_start = dttm_start + datetime.timedelta(days=1)
+    result=[]
     for k, n in d.items():
-
+        temp=[]
         if k >= dttm_start and k <= dttm_end:
             # mean_d = ((d_currency[k] * 10000) / 100)
 
             mean_d = d_currency[k] * coef
 
-            DB_postgres.insert(mean_d, name_currency, d_currency[k], k, name_currency)
+            temp.append(d_currency[k])
+
+            temp.append(name_currency)
+            temp.append(mean_d)
+            temp.append(k)
+            temp.append(name_currency)
+            result.append(temp)
+            result_rb = dict(
+                keyword=name_currency,
+                dttm=str(k),
+                value=mean_d
+            )
+            result_rb = json.dumps(result_rb)
+            insert_rabbit(result_rb)
+    DB_postgres.insert(result)
 
 
 def get_cites_dttm_btc (name_currency, dttm_start, dttm_end):
@@ -459,8 +502,10 @@ def get_update_data (name_currency, dttm):
     sum = 0
     count = 0
     coef = 0
+    result = []
+    dttm_new=dttm+datetime.timedelta(days=1)
     for k, n in d.items():
-        if k >= dttm and k < dttm + datetime.timedelta(days=1) and dttm + datetime.timedelta(
+        if k >= dttm_new and k < dttm_new + datetime.timedelta(days=1) and dttm_new + datetime.timedelta(
                 days=1) < datetime.datetime.now():
 
             sum += d_currency[k]
@@ -472,11 +517,12 @@ def get_update_data (name_currency, dttm):
                 count = 0
                 coef = dest[1] / coef
                 break
-
+    dttm_new=dttm+datetime.timedelta(days=1)
     for k, n in d.items():
-        if k.date() == (datetime.datetime.now() - datetime.timedelta(days=1)).date():
+        temp=[]
+        if k.date() == (datetime.datetime.now()).date():
             break
-        if k >= dttm and k < dttm + datetime.timedelta(days=1) and dttm + datetime.timedelta(
+        if k >= dttm_new and k < dttm_new + datetime.timedelta(days=1) and dttm_new + datetime.timedelta(
                 days=1) < datetime.datetime.now():
             sum += d_currency[k]
             count += 1
@@ -486,17 +532,27 @@ def get_update_data (name_currency, dttm):
                 mean_d = sum * coef
                 sum = 0
                 count = 0
-                DB_postgres.insert(mean_d, name_currency, d_currency[k], k, on_currency)
-                result = dict(
+
+                result_rb = dict(
                     keyword=name_currency,
                     dttm=str(k),
                     value=mean_d
                 )
-                result = json.dumps(result)
-                insert_rabbit(result)
+                result_rb = json.dumps(result_rb)
+                insert_rabbit(result_rb)
                 dttm = dttm + datetime.timedelta(days=1)
+                temp.append(d_currency[k])
 
-    print('write - {}'.format(name_currency))
+                temp.append(name_currency)
+                temp.append(mean_d)
+                temp.append(k-datetime.timedelta(days=1))
+                temp.append(on_currency)
+                result.append(temp)
+
+                dttm_new = dttm_new + datetime.timedelta(days=1)
+
+    DB_postgres.insert(result)
+
 
 
 def get_7_days (name_currency):
@@ -618,8 +674,10 @@ def get_7_days_btc ():
                 coef = dest[1] / coef
                 break
     old_data = old_data + datetime.timedelta(days=1)
+    result=[]
     for k, n in d.items():
-        if k.date() == (datetime.datetime.now() - datetime.timedelta(days=1)).date():
+        temp=[]
+        if k.date() == (datetime.datetime.now()).date():
             break
         if k >= old_data and k < old_data + datetime.timedelta(days=1) and old_data + datetime.timedelta(
                 days=1) < datetime.datetime.now():
@@ -631,10 +689,22 @@ def get_7_days_btc ():
                 mean_d = sum * coef
                 sum = 0
                 count = 0
+                result_rb = dict(
+                    keyword='bitcoin',
+                    dttm=str(k),
+                    value=mean_d
+                )
+                result_rb = json.dumps(result_rb)
+                insert_rabbit(result_rb)
+                temp.append(coef)
 
-                DB_postgres.insert(mean_d, 'bitcoin', coef, k, 'bitcoin')
-
+                temp.append('bitcoin')
+                temp.append(mean_d)
+                temp.append(k)
+                temp.append('bitcoin')
+                result.append(temp)
                 old_data = old_data + datetime.timedelta(days=1)
+    DB_postgres.insert(result)
 
 
 def get_last_data (name_currency):
