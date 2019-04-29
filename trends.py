@@ -1,5 +1,5 @@
 
-
+import re
 import datetime
 import function_trends
 import sys
@@ -44,19 +44,24 @@ def update():
     dttm=datetime.datetime.strptime(str(dttm.year)+'-'+str(dttm.month)+'-'+str(dttm.day)+' 00:00:00','%Y-%m-%d %H:%M:%S')
 
     currency_all=function_trends.get_currency_name()
+    currency_download=function_trends.DB_postgres.get_already_cuurency()
+
     for item in currency_all:
-       try:
-        if item['source_id'].lower() == item['symbol'].lower():
-            if function_trends.check_currency(item['symbol'].lower()):
-                function_trends.get_update_data(item['symbol'].lower(),dttm)
-        else:
-            if function_trends.check_currency(item['symbol'].lower()):
-                function_trends.get_update_data(item['symbol'].lower(),dttm)
-            if function_trends.check_currency(item['source_id'].lower()):
-                function_trends.get_update_data(item['source_id'].lower(),dttm)
-       except Exception as e:
-           print('error')
-           continue
+        if item['symbol'].lower() not in currency_download or item['source_id'].lower() not in currency_download:
+            try:
+                if item['source_id'].lower() == item['symbol'].lower():
+                    if function_trends.check_currency(item['symbol'].lower()):
+                        function_trends.get_update_data(item['symbol'].lower(),dttm)
+                else:
+                    if function_trends.check_currency(item['symbol'].lower()):
+                        function_trends.get_update_data(item['symbol'].lower(),dttm)
+                    if function_trends.check_currency(item['source_id'].lower()):
+                        function_trends.get_update_data(item['source_id'].lower(),dttm)
+            except Exception as e:
+                if re.search('Google',e.args[0]):
+                    break
+                print('error')
+                continue
 
 
 #Первый запуск программы, сначала загружается Bitcoin
@@ -130,12 +135,12 @@ if __name__ == "__main__":
 
 # new_data = function_trends.last_date('bitcoin')
 # dttm_end = datetime.datetime.now()-datetime.timedelta(days=3)
-#
+# 
 # if new_data<dttm_end:
 #     function_trends.get_btc_coef('bitcoin',new_data,dttm_end)
 #     function_trends.get_7_days_btc()
 # elif new_data.date()<(datetime.datetime.now()-datetime.timedelta(days=1)).date():
-#
+# 
 #     function_trends.get_7_days_btc()
 # update()
 # print('complete')
