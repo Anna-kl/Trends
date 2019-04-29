@@ -13,12 +13,12 @@ e = os.environ
 # e['host']='185.230.142.61'
 # e['login']='externalanna'
 # e['password']='44iAipyAjHHxkwHgyAPrqPSR5'
-#
+# 
 # e['host_mysql']='clh.datalight.me'
 # e['user']='reader'
 # e['password_mysql']='nb7hd-1HG6f'
 # e['db_mysql']='coins_dict'
-#
+# 
 # e['login_MQ']='google_trends'
 # e['password_MQ']='X3g6unrboVScnyfe'
 # e['host_MQ']='parser.datalight.me'
@@ -29,6 +29,16 @@ class DB:
 
     def __init__ (self):
         self.con = self.get_param_for_db()
+
+    def get_already_cuurency(self):
+        date=datetime.datetime.now()-datetime.timedelta(days=1)
+        date=datetime.datetime.strptime(str(date.date())+' 00:00','%Y-%m-%d %H:%M')
+        select=currency.select().with_only_columns([currency.c.currency]).where(currency.c.dttm==date).group_by(currency.c.currency)
+        db=self.con.execute(select)
+        curren=[]
+        for item in db:
+            curren.append(item._row[0])
+        return curren
 
     def get_param_for_db (self):
         url = 'postgresql://{}:{}@{}:5432/{}'
@@ -187,10 +197,10 @@ def get_cites_from_dttm (name_currency, dttm_start, dttm_end, on_currency):
             if k >= dttm_start and k <= dttm_end:
                 try:
                     mean_d = (d_currency[k] * result_db[k]) / d[k]
-                except:
+                except Exception as e:
                     mean_d = 0.01
                 if mean_d == 0:
-                    print(result_db[k])
+                    # print(result_db[k])
                     mean_d = 0.01
 
                 result_rb = dict(
@@ -520,8 +530,7 @@ def get_update_data (name_currency, dttm):
     dttm_new=dttm+datetime.timedelta(days=1)
     for k, n in d.items():
         temp=[]
-        if k.date() == (datetime.datetime.now()).date():
-            break
+
         if k >= dttm_new and k < dttm_new + datetime.timedelta(days=1) and dttm_new + datetime.timedelta(
                 days=1) < datetime.datetime.now():
             sum += d_currency[k]
@@ -540,7 +549,7 @@ def get_update_data (name_currency, dttm):
                 )
                 result_rb = json.dumps(result_rb)
                 insert_rabbit(result_rb)
-                dttm = dttm + datetime.timedelta(days=1)
+                dttm_new = dttm_new + datetime.timedelta(days=1)
                 temp.append(d_currency[k])
 
                 temp.append(name_currency)
