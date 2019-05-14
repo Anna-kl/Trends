@@ -58,8 +58,7 @@ def update():
                     if function_trends.check_currency(item['source_id'].lower()):
                         function_trends.get_update_data(item['source_id'].lower(),dttm)
             except Exception as e:
-                if re.search('Google',e.args[0]):
-                    break
+
                 print('error')
                 continue
 
@@ -132,15 +131,15 @@ if __name__ == "__main__":
 
         update()
 
-
+#
 # new_data = function_trends.last_date('bitcoin')
 # dttm_end = datetime.datetime.now()-datetime.timedelta(days=3)
-# 
+#
 # if new_data<dttm_end:
 #     function_trends.get_btc_coef('bitcoin',new_data,dttm_end)
 #     function_trends.get_7_days_btc()
 # elif new_data.date()<(datetime.datetime.now()-datetime.timedelta(days=1)).date():
-# 
+#
 #     function_trends.get_7_days_btc()
 # update()
 # print('complete')
