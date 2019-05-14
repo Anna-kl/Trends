@@ -13,16 +13,18 @@ e = os.environ
 # e['host']='185.230.142.61'
 # e['login']='externalanna'
 # e['password']='44iAipyAjHHxkwHgyAPrqPSR5'
-# 
+#
 # e['host_mysql']='clh.datalight.me'
 # e['user']='reader'
 # e['password_mysql']='nb7hd-1HG6f'
 # e['db_mysql']='coins_dict'
-# 
+#
 # e['login_MQ']='google_trends'
 # e['password_MQ']='X3g6unrboVScnyfe'
 # e['host_MQ']='parser.datalight.me'
 # e['queue']='google_trends'
+# e['start']='451'
+# e['end']='900'
 
 
 class DB:
@@ -89,13 +91,13 @@ def get_currency_name ():
     try:
         with connection.cursor() as cursor:
             # Create a new record
-            sql = "SELECT source_id, inside_id, symbol FROM coins_dict.coins_source_id where `source`='google_trends';"
+            sql = "SELECT source_id, inside_id, symbol FROM coins_dict.coins_source_id where `source`='google_trends' and inside_id>{} and inside_id<{};".format(e.get('start'),e.get('end'))
             cursor.execute(sql)
 
             for item in cursor:
                 result.append(item)
 
-    except:
+    except Exception as er:
         print('error MySQL')
     finally:
         connection.close()
@@ -544,21 +546,23 @@ def get_update_data (name_currency, dttm):
 
                 result_rb = dict(
                     keyword=name_currency,
-                    dttm=str(k),
+                    dttm=str(dttm_new),
                     value=mean_d
                 )
                 result_rb = json.dumps(result_rb)
                 insert_rabbit(result_rb)
-                dttm_new = dttm_new + datetime.timedelta(days=1)
+
                 temp.append(d_currency[k])
 
                 temp.append(name_currency)
                 temp.append(mean_d)
-                temp.append(k-datetime.timedelta(days=1))
+                temp.append(dttm_new)
                 temp.append(on_currency)
                 result.append(temp)
 
                 dttm_new = dttm_new + datetime.timedelta(days=1)
+        if k.date() == (datetime.datetime.now()).date():
+            break
 
     DB_postgres.insert(result)
 
@@ -686,8 +690,7 @@ def get_7_days_btc ():
     result=[]
     for k, n in d.items():
         temp=[]
-        if k.date() == (datetime.datetime.now()).date():
-            break
+
         if k >= old_data and k < old_data + datetime.timedelta(days=1) and old_data + datetime.timedelta(
                 days=1) < datetime.datetime.now():
             sum += d[k]
@@ -700,7 +703,7 @@ def get_7_days_btc ():
                 count = 0
                 result_rb = dict(
                     keyword='bitcoin',
-                    dttm=str(k),
+                    dttm=str(old_data),
                     value=mean_d
                 )
                 result_rb = json.dumps(result_rb)
@@ -709,10 +712,12 @@ def get_7_days_btc ():
 
                 temp.append('bitcoin')
                 temp.append(mean_d)
-                temp.append(k)
+                temp.append(old_data)
                 temp.append('bitcoin')
                 result.append(temp)
                 old_data = old_data + datetime.timedelta(days=1)
+        if k.date() == (datetime.datetime.now()).date():
+            break
     DB_postgres.insert(result)
 
 
