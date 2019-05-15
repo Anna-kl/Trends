@@ -20,12 +20,7 @@ ENV password_MQ X3g6unrboVScnyfe
 ENV host_MQ parser.datalight.me
 ENV queue google_trends
 
-ENV start 0
-ENV end 450
+
 
 
 RUN pip install -r /config/requirements.txt
-
-
-ENV http_proxy 'http://35.235.89.78:85'
-ENV https_proxy 'https://165.22.254.98:3128'
