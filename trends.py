@@ -39,11 +39,11 @@ def get_currency(name_currency):
 
 
 # update all currency
-def update():
+def update(start, end):
     dttm=datetime.datetime.now().date()
     dttm=datetime.datetime.strptime(str(dttm.year)+'-'+str(dttm.month)+'-'+str(dttm.day)+' 00:00:00','%Y-%m-%d %H:%M:%S')
 
-    currency_all=function_trends.get_currency_name()
+    currency_all=function_trends.get_currency_name(start, end)
     currency_download=function_trends.DB_postgres.get_already_cuurency()
 
     for item in currency_all:
@@ -129,7 +129,7 @@ if __name__ == "__main__":
 
             function_trends.get_7_days_btc()
 
-        update()
+        update(sys.argv[2], sys.argv[3])
 
 #
 # new_data = function_trends.last_date('bitcoin')
