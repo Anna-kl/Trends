@@ -79,7 +79,7 @@ meta = sqlalchemy.MetaData(bind=DB_postgres.con, reflect=True, schema='google')
 currency = meta.tables['google.currency_normalize']
 
 
-def get_currency_name ():
+def get_currency_name (start, end):
     result = []
     url_mysql = 'mysql+mysqldb://reader:nb7hd-1HG6f@clh.datalight.me:3306/coins_dict'
     connection = pymysql.connect(host=e.get('host_mysql'),
@@ -91,7 +91,7 @@ def get_currency_name ():
     try:
         with connection.cursor() as cursor:
             # Create a new record
-            sql = "SELECT source_id, inside_id, symbol FROM coins_dict.coins_source_id where `source`='google_trends' and inside_id>{} and inside_id<{};".format(e.get('start'),e.get('end'))
+            sql = "SELECT source_id, inside_id, symbol FROM coins_dict.coins_source_id where `source`='google_trends' and inside_id>{} and inside_id<{};".format(start,end)
             cursor.execute(sql)
 
             for item in cursor:
