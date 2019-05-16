@@ -10,19 +10,19 @@ import json
 import pika
 
 e = os.environ
-# e['host']='185.230.142.61'
-# e['login']='externalanna'
-# e['password']='44iAipyAjHHxkwHgyAPrqPSR5'
-#
-# e['host_mysql']='clh.datalight.me'
-# e['user']='reader'
-# e['password_mysql']='nb7hd-1HG6f'
-# e['db_mysql']='coins_dict'
-#
-# e['login_MQ']='google_trends'
-# e['password_MQ']='X3g6unrboVScnyfe'
-# e['host_MQ']='parser.datalight.me'
-# e['queue']='google_trends'
+e['host']='185.230.142.61'
+e['login']='externalanna'
+e['password']='44iAipyAjHHxkwHgyAPrqPSR5'
+
+e['host_mysql']='clh.datalight.me'
+e['user']='reader'
+e['password_mysql']='nb7hd-1HG6f'
+e['db_mysql']='coins_dict'
+
+e['login_MQ']='google_trends'
+e['password_MQ']='X3g6unrboVScnyfe'
+e['host_MQ']='parser.datalight.me'
+e['queue']='google_trends'
 # e['start']='451'
 # e['end']='900'
 
