@@ -21,6 +21,4 @@ ENV host_MQ parser.datalight.me
 ENV queue google_trends
 
 
-
-
 RUN pip install -r /config/requirements.txt
