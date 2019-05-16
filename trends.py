@@ -3,6 +3,8 @@ import re
 import datetime
 import function_trends
 import sys
+import os
+import random
 
 # load all currency
 def get_all_currency ():
@@ -23,6 +25,19 @@ def get_all_currency ():
                 dttm_history(item['source_id'].lower().replace('$', '').replace('#', ''))
       except:
           continue
+
+def getProxy():
+    proxy=None
+
+
+    with open('/opt/application/proxys.txt','r') as file:
+            proxys=file.readlines()
+            print(proxys)
+            proxy=random.choice(proxys).strip()
+            file.close
+
+    return proxy
+
 
 def get_currency(name_currency):
     dttm=function_trends.get_last_data(name_currency)
@@ -113,8 +128,13 @@ def dttm_history(name_currency):
     date_end=dttm_end
     function_trends.get_cites_from_dttm(name_currency, dttm_start, date_end,item_currency)
 
-
+#
 if __name__ == "__main__":
+    proxy=getProxy()
+    os.environ['http_proxy']=proxy
+    os.environ['https_proxy'] = proxy
+    os.environ['HTTP_PROXY'] = proxy
+    os.environ['HTTPS_PROXY'] = proxy
     if sys.argv[1]=='all':
         get_all_currency()
         print('all currency load')
@@ -131,7 +151,7 @@ if __name__ == "__main__":
 
         update(sys.argv[2], sys.argv[3])
 
-#
+
 # new_data = function_trends.last_date('bitcoin')
 # dttm_end = datetime.datetime.now()-datetime.timedelta(days=3)
 #
@@ -141,5 +161,6 @@ if __name__ == "__main__":
 # elif new_data.date()<(datetime.datetime.now()-datetime.timedelta(days=1)).date():
 #
 #     function_trends.get_7_days_btc()
-# update()
+# update(0,450)
 # print('complete')
+
