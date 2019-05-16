@@ -1,7 +1,7 @@
 version: '3'
 services:
   web:
-    command: python trends.py update 0 450
+    command: python trends.py update 0 1400
     environment:
       - PYTHONUNBUFFERED=0
     build:
@@ -11,3 +11,4 @@ services:
     volumes:
       - ./logs:/code/logs
       - .:/code
+      - /home/anna/proxys.txt:/opt/application/proxys.txt
