@@ -32,7 +32,7 @@ def getProxy():
 
     with open('/opt/application/proxys.txt','r') as file:
             proxys=file.readlines()
-            print(proxys)
+
             proxy=random.choice(proxys).strip()
             file.close
 
@@ -131,10 +131,11 @@ def dttm_history(name_currency):
 #
 if __name__ == "__main__":
     proxy=getProxy()
-    os.environ['http_proxy']=proxy
-    os.environ['https_proxy'] = proxy
-    os.environ['HTTP_PROXY'] = proxy
-    os.environ['HTTPS_PROXY'] = proxy
+    print(proxy)
+    os.environ['http_proxy']='http://'+proxy
+    os.environ['https_proxy'] ='https://'+proxy
+    os.environ['HTTP_PROXY'] ='http://'+ proxy
+    os.environ['HTTPS_PROXY'] = 'https://'+proxy
     if sys.argv[1]=='all':
         get_all_currency()
         print('all currency load')
